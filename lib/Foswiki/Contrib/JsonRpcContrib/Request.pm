@@ -82,9 +82,9 @@ sub new {
     # check that this is a http POST
     my $httpMethod = $request->method() || "jsonrpc";
 
-    #    throw Foswiki::Contrib::JsonRpcContrib::Error( -32600,
-    #        "Method must be POST" )
-    #      unless $httpMethod =~ /post|jsonrpc/i;
+    throw Foswiki::Contrib::JsonRpcContrib::Error( -32600,
+        "Method must be POST" )
+      unless $httpMethod =~ /post|jsonrpc/i;
 
     # some basic checks if this is a proper json-rpc 2.0 request
 

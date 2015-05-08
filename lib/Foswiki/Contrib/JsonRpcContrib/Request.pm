@@ -1,6 +1,6 @@
 # JSON-RPC for Foswiki
 #
-# Copyright (C) 2011-2014 Michael Daum http://michaeldaumconsulting.com
+# Copyright (C) 2011-2015 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,7 +20,6 @@ use strict;
 use warnings;
 
 use JSON                                    ();
-use Encode                                  ();
 use Foswiki::Contrib::JsonRpcContrib::Error ();
 use Error qw( :try );
 use Foswiki::Func    ();
@@ -32,6 +31,7 @@ sub new {
     my ( $class, $session ) = @_;
 
     my $request = $session->{request};
+
     my $this = bless( {}, $class );
 
     # get json-rpc request object
@@ -41,7 +41,7 @@ sub new {
     }
     else {
 
-        # minimal stup
+        # minimal setup
         $data = '{"jsonrpc":"2.0"}';
     }
     writeDebug("data=$data") if TRACE;
@@ -55,12 +55,12 @@ sub new {
         $method    = $2;
     }
     $this->namespace($namespace);
-    writeDebug("namepsace=$namespace") if TRACE;
+    writeDebug("namespace=$namespace") if TRACE;
 
     # override json-rpc params using url params
-    foreach my $key ( $request->param() ) {
+    foreach my $key ( $request->multi_param() ) {
         next if $key =~ /^(POSTDATA|method|id|jsonrpc)$/;  # these are different
-        my @vals = map( fromUtf8($_), $request->param($key) );
+        my @vals = map( fromUtf8($_), $request->multi_param($key) );
         if ( scalar(@vals) == 1 ) {
             $this->param( $key => $vals[0] )
               ;    # set json-rpc params using url params
@@ -199,10 +199,17 @@ sub fromUtf8 {
     my $string = shift;
 
     return $string unless $string;
+
+    return $string
+      if ( $Foswiki::cfg{Site}{CharSet} || 'utf-8' ) =~ /^utf-?8/i;
+
     return $string
       if $Foswiki::Plugins::VERSION >
       2.1;    # not required on "newer" foswikis, is it?
 
+    # SMELL: CDot doesn't understand why you would ever want to convert
+    # params to unicode, especially not in a pre-1.2 wiki.....
+    require Encode;
     return Encode::decode_utf8($string);
 }
 

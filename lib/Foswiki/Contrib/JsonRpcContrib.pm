@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# JsonRpcContrib is Copyright (C) 2011-2014 Michael Daum http://michaeldaumconsulting.com
+# JsonRpcContrib is Copyright (C) 2011-2015 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,6 +17,16 @@ package Foswiki::Contrib::JsonRpcContrib;
 
 use strict;
 use warnings;
+use Foswiki::Request ();
+
+BEGIN {
+    # Backwards compatibility for Foswiki 1.1.x
+    unless ( Foswiki::Request->can('multi_param') ) {
+        no warnings 'redefine';
+        *Foswiki::Request::multi_param = \&Foswiki::Request::param;
+        use warnings 'redefine';
+    }
+}
 
 =begin TML
 
@@ -24,8 +34,8 @@ use warnings;
 
 =cut
 
-our $VERSION           = '2.12';
-our $RELEASE           = '2.12';
+our $VERSION           = '2.21';
+our $RELEASE           = '2.21';
 our $SHORTDESCRIPTION  = 'JSON-RPC interface for Foswiki';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SERVER;
